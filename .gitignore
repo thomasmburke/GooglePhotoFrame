@@ -127,3 +127,6 @@ dmypy.json
 
 # Pyre type checker
 .pyre/
+
+# OAuth client id credentials
+google_photo_frame_OAuth.json
