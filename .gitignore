@@ -130,3 +130,6 @@ dmypy.json
 
 # OAuth client id credentials
 google_photo_frame_OAuth.json
+
+# don't push creds pickle file
+*.pickle
