@@ -40,14 +40,11 @@ def Create_Service(client_secret_file, api_name, api_version, *scopes):
     except Exception as e:
         print(e)
     return None
+
+API_NAME = 'photoslibrary'
+API_VERSION = 'v1'
+CLIENT_SECRET_FILE = 'google_photo_frame_OAuth.json'
+SCOPES = ['https://www.googleapis.com/auth/photoslibrary',
+          'https://www.googleapis.com/auth/photoslibrary.sharing']
  
-def convert_to_RFC_datetime(year=1900, month=1, day=1, hour=0, minute=0):
-    dt = datetime.datetime(year, month, day, hour, minute, 0).isoformat() + 'Z'
-    return dt
-
-
-
-
-if __name__ == "__main__":
-    print("hello world")
-    # https://photos.google.com/album/AF1QipOrO8MdNWZkPE_tkGeNb6pvl_d0XduqIhx-9YOM
+service = Create_Service(CLIENT_SECRET_FILE,API_NAME, API_VERSION, SCOPES)

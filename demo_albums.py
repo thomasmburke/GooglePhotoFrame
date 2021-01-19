@@ -1,9 +1,12 @@
-from io import BytesIO
 import json
+import tkinter
+from io import BytesIO
+
 import requests
 from PIL import Image, ImageTk
-from init_photo_service import service
-import tkinter
+
+from google_photo_ops import service
+
 # https://learndataanalysis.org/mediaitems-resource-google-photos-api-and-python-part-3/
 
 def response_media_items_by_filter(request_body: dict):
