@@ -1,7 +1,10 @@
+import logging
 import tkinter
 
 from PIL import Image, ImageTk
 
+# Set logger
+logger = logging.getLogger(__name__)
 
 def quit(*args):
     root.destroy()

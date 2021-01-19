@@ -1,3 +1,4 @@
+import logging
 import os
 import pickle
 
@@ -6,9 +7,11 @@ from google_auth_oauthlib.flow import Flow, InstalledAppFlow
 from googleapiclient.discovery import build
 from googleapiclient.http import MediaFileUpload
 
+# Set logger
+logger = logging.getLogger(__name__)
 
 def Create_Service(client_secret_file, api_name, api_version, *scopes):
-    print(client_secret_file, api_name, api_version, scopes, sep='-')
+    logger.info(f"{client_secret_file}-{api_name}-{api_version}-{scopes}")
     CLIENT_SECRET_FILE = client_secret_file
     API_SERVICE_NAME = api_name
     API_VERSION = api_version
@@ -17,7 +20,6 @@ def Create_Service(client_secret_file, api_name, api_version, *scopes):
     cred = None
  
     pickle_file = f'token_{API_SERVICE_NAME}_{API_VERSION}.pickle'
-    # print(pickle_file)
  
     if os.path.exists(pickle_file):
         with open(pickle_file, 'rb') as token:
@@ -35,16 +37,17 @@ def Create_Service(client_secret_file, api_name, api_version, *scopes):
  
     try:
         service = build(API_SERVICE_NAME, API_VERSION, credentials=cred)
-        print(API_SERVICE_NAME, 'service created successfully')
+        logger.info(f"{API_SERVICE_NAME}: service created successfully")
         return service
     except Exception as e:
-        print(e)
+        logger.error(e)
     return None
 
-API_NAME = 'photoslibrary'
-API_VERSION = 'v1'
-CLIENT_SECRET_FILE = 'google_photo_frame_OAuth.json'
-SCOPES = ['https://www.googleapis.com/auth/photoslibrary',
-          'https://www.googleapis.com/auth/photoslibrary.sharing']
- 
-service = Create_Service(CLIENT_SECRET_FILE,API_NAME, API_VERSION, SCOPES)
+def create_google_photo_service():
+    API_NAME = 'photoslibrary'
+    API_VERSION = 'v1'
+    CLIENT_SECRET_FILE = 'google_photo_frame_OAuth.json'
+    SCOPES = ['https://www.googleapis.com/auth/photoslibrary',
+            'https://www.googleapis.com/auth/photoslibrary.sharing']
+    
+    return Create_Service(CLIENT_SECRET_FILE,API_NAME, API_VERSION, SCOPES)
