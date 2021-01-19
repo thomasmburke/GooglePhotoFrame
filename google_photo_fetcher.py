@@ -3,9 +3,9 @@ import tkinter
 from io import BytesIO
 
 import requests
-from PIL import Image, ImageTk
+from PIL import Image
 
-from google_photo_ops import service
+from initialize_google_photo_client import service
 
 # https://learndataanalysis.org/mediaitems-resource-google-photos-api-and-python-part-3/
 
@@ -47,34 +47,12 @@ lstMediaItems = response_media_items_by_filter(request_body=request_body)
 
 print(json.dumps(lstMediaItems, indent=4))
 
-for mediaItem in lstMediaItems:
-    if ('HEIC' in mediaItem['filename']):
-        url = mediaItem['baseUrl']
+# for mediaItem in lstMediaItems:
+#     if ('HEIC' in mediaItem['filename']):
+#         url = mediaItem['baseUrl']
 
 
-def quit(*args):
-    root.destroy()
 
-def showPIL(pilImage):
-    root = tkinter.Tk()
-    w, h = root.winfo_screenwidth(), root.winfo_screenheight()
-    root.overrideredirect(1)
-    root.geometry("%dx%d+0+0" % (w, h))
-    # root.focus_set()    
-    root.bind("<Escape>", quit)
-    root.bind("x", quit)
-    canvas = tkinter.Canvas(root,width=w,height=h, bd=0)
-    canvas.pack()
-    canvas.configure(background='black')
-    imgWidth, imgHeight = pilImage.size
-    if imgWidth > w or imgHeight > h:
-        ratio = min(w/imgWidth, h/imgHeight)
-        imgWidth = int(imgWidth*ratio)
-        imgHeight = int(imgHeight*ratio)
-        pilImage = pilImage.resize((imgWidth,imgHeight), Image.ANTIALIAS)
-    image = ImageTk.PhotoImage(pilImage)
-    imagesprite = canvas.create_image(w/2,h/2,image=image)
-    root.mainloop()
 
 
 response = requests.get(url)
