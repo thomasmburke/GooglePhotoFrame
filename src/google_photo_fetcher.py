@@ -14,25 +14,45 @@ from initialize_google_photo_client import create_google_photo_service
 # Set logger
 logger = logging.getLogger(__name__)
 
-def response_media_items_by_filter(request_body: dict):
+def response_media_items_by_filter(request_body: dict, service):
     try:
         response_search = service.mediaItems().search(body=request_body).execute()
         lstMediaItems = response_search.get('mediaItems')
         nextPageToken = response_search.get('nextPageToken')
+        logger.info(f"nextPageToken: {nextPageToken}")
  
         while nextPageToken:
             request_body['pageToken'] = nextPageToken
             response_search = service.mediaItems().search(body=request_body).execute()
  
-            if not response_search.get('mediaItem') is None:
+            if not response_search.get('mediaItems') is None:
                 lstMediaItems.extend(response_search.get('mediaItems'))
                 nextPageToken = response_search.get('nextPageToken')
+                logger.info(f"nextPageToken: {nextPageToken}")
             else:
+                logger.info(f"no next page: {json.dumps(response_search, indent=4)}")
                 nextPageToken = ''
         return lstMediaItems
     except Exception as e:
         logger.error(e)
         return None
+
+def get_next_image_url(service, albumId):
+    request_body = {
+        'albumId': albumId,
+        'pageSize': 1
+    }
+    lstMediaItems = response_media_items_by_filter(request_body=request_body, service=service)
+    logger.info(json.dumps(lstMediaItems, indent=4))
+    return lstMediaItems
+
+def get_google_photo_frame_album_id(service):
+    response_albums_list = service.albums().list().execute()
+    albums_list = response_albums_list.get('albums')
+    albumId = next(filter(lambda x: "GooglePhotoFrame" in x['title'], albums_list))['id']
+    logger.info(f"GooglePhotoFrame albumId: {albumId}")
+    return albumId
+
 
 if __name__=='__main__':
     # Set default logging level
@@ -42,23 +62,10 @@ if __name__=='__main__':
         format="[%(asctime)s] %(levelname)s [%(name)s.%(funcName)s:%(lineno)d] %(message)s",
         datefmt='%Y-%m-%dT%H:%M:%S')
 
-    """
-    search method (by album id)
-    """
     service = create_google_photo_service()
-    response_albums_list = service.albums().list().execute()
-    albums_list = response_albums_list.get('albums')
+    albumId = get_google_photo_frame_album_id(service=service)
+    lstMediaItems = get_next_image_url(service=service, albumId=albumId)
     
-    album_id = next(filter(lambda x: "GooglePhotoFrame" in x['title'], albums_list))['id']
-    
-    request_body = {
-        'albumId': album_id,
-        'pageSize': 25
-    }
-
-    lstMediaItems = response_media_items_by_filter(request_body=request_body)
-
-    logger.info(json.dumps(lstMediaItems, indent=4))
 
     # for mediaItem in lstMediaItems:
     #     if ('HEIC' in mediaItem['filename']):
