@@ -14,37 +14,23 @@ from initialize_google_photo_client import create_google_photo_service
 # Set logger
 logger = logging.getLogger(__name__)
 
-def response_media_items_by_filter(request_body: dict, service):
-    try:
-        response_search = service.mediaItems().search(body=request_body).execute()
-        lstMediaItems = response_search.get('mediaItems')
-        nextPageToken = response_search.get('nextPageToken')
-        logger.info(f"nextPageToken: {nextPageToken}")
- 
-        while nextPageToken:
-            request_body['pageToken'] = nextPageToken
-            response_search = service.mediaItems().search(body=request_body).execute()
- 
-            if not response_search.get('mediaItems') is None:
-                lstMediaItems.extend(response_search.get('mediaItems'))
-                nextPageToken = response_search.get('nextPageToken')
-                logger.info(f"nextPageToken: {nextPageToken}")
-            else:
-                logger.info(f"no next page: {json.dumps(response_search, indent=4)}")
-                nextPageToken = ''
-        return lstMediaItems
-    except Exception as e:
-        logger.error(e)
-        return None
-
-def get_next_image_url(service, albumId):
+def get_next_image_url(service, albumId, nextPageToken='firstRequest'):
     request_body = {
         'albumId': albumId,
         'pageSize': 1
     }
-    lstMediaItems = response_media_items_by_filter(request_body=request_body, service=service)
-    logger.info(json.dumps(lstMediaItems, indent=4))
-    return lstMediaItems
+    try:
+        if (nextPageToken and nextPageToken != 'firstRequest'):
+            request_body['pageToken'] = nextPageToken
+        response_search = service.mediaItems().search(body=request_body).execute()
+        lstMediaItems = response_search.get('mediaItems')
+        nextPageToken = response_search.get('nextPageToken', '')
+        logger.info(json.dumps(lstMediaItems, indent=4))
+        logger.info(f"nextPageToken: {nextPageToken}")
+        return [lstMediaItems, nextPageToken]
+    except Exception as e:
+        logger.error(e)
+        return None
 
 def get_google_photo_frame_album_id(service):
     response_albums_list = service.albums().list().execute()
@@ -64,7 +50,7 @@ if __name__=='__main__':
 
     service = create_google_photo_service()
     albumId = get_google_photo_frame_album_id(service=service)
-    lstMediaItems = get_next_image_url(service=service, albumId=albumId)
+    lstMediaItems, nextPageToken = get_next_image_url(service=service, albumId=albumId)
     
 
     # for mediaItem in lstMediaItems:

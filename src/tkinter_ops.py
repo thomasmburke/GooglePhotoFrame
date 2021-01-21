@@ -1,6 +1,7 @@
 import logging
 import tkinter
 
+import requests
 from PIL import Image, ImageTk
 
 # Set logger
@@ -30,6 +31,6 @@ def showPIL(pilImage):
     imagesprite = canvas.create_image(w/2,h/2,image=image)
     root.mainloop()
 
-response = requests.get(url)
-pilImage = Image.open(BytesIO(response.content))
-showPIL(pilImage)
+# response = requests.get(url)
+# pilImage = Image.open(BytesIO(response.content))
+# showPIL(pilImage)
