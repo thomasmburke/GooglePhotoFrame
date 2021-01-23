@@ -38,6 +38,17 @@ def get_google_photo_frame_album_id(service):
     albumId = next(filter(lambda x: "GooglePhotoFrame" in x['title'], albums_list))['id']
     logger.info(f"GooglePhotoFrame albumId: {albumId}")
     return albumId
+    
+def get_image_bytes(url):
+	logger.info('Making request for image...')
+	response = requests.get(url)
+	logger.info('Returning bytes of image received...')
+	return response.content
+	
+def create_PILImage(imageBytes):
+	logger.info('Turning image bytes into PILImage...')
+	pilImage = Image.open(BytesIO(imageBytes))
+	return pilImage
 
 
 if __name__=='__main__':
