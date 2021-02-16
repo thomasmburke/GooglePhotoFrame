@@ -9,6 +9,7 @@ from googleapiclient.http import MediaFileUpload
 
 # Set logger
 logger = logging.getLogger(__name__)
+srcDir = '/home/pi/Desktop/GooglePhotoFrame/src/'
 
 def Create_Service(client_secret_file, api_name, api_version, *scopes):
     logger.info(f"{client_secret_file}-{api_name}-{api_version}-{scopes}")
@@ -21,8 +22,8 @@ def Create_Service(client_secret_file, api_name, api_version, *scopes):
  
     pickle_file = f'token_{API_SERVICE_NAME}_{API_VERSION}.pickle'
  
-    if os.path.exists(pickle_file):
-        with open(pickle_file, 'rb') as token:
+    if os.path.exists(f'{srcDir}{pickle_file}'):
+        with open(f'{srcDir}{pickle_file}', 'rb') as token:
             cred = pickle.load(token)
  
     if not cred or not cred.valid:
@@ -46,7 +47,7 @@ def Create_Service(client_secret_file, api_name, api_version, *scopes):
 def create_google_photo_service():
     API_NAME = 'photoslibrary'
     API_VERSION = 'v1'
-    CLIENT_SECRET_FILE = 'google_photo_frame_OAuth.json'
+    CLIENT_SECRET_FILE = f'{srcDir}google_photo_frame_OAuth.json'
     SCOPES = ['https://www.googleapis.com/auth/photoslibrary',
             'https://www.googleapis.com/auth/photoslibrary.sharing']
     
