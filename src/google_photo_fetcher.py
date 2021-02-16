@@ -6,6 +6,8 @@ from logging.handlers import RotatingFileHandler
 
 import requests
 from PIL import Image
+from time import sleep
+import random
 
 from initialize_google_photo_client import create_google_photo_service
 
@@ -19,18 +21,27 @@ def get_next_image_url(service, albumId, nextPageToken='firstRequest'):
         'albumId': albumId,
         'pageSize': 1
     }
-    try:
-        if (nextPageToken and nextPageToken != 'firstRequest'):
-            request_body['pageToken'] = nextPageToken
-        response_search = service.mediaItems().search(body=request_body).execute()
-        lstMediaItems = response_search.get('mediaItems')
-        nextPageToken = response_search.get('nextPageToken', '')
-        logger.info(json.dumps(lstMediaItems, indent=4))
-        logger.info(f"nextPageToken: {nextPageToken}")
-        return [lstMediaItems, nextPageToken]
-    except Exception as e:
-        logger.error(e)
-        return None
+    # Exponential backoff Retry Logic
+    n = 0
+    while n < 13:
+        try:
+            if (nextPageToken and nextPageToken != 'firstRequest'):
+                request_body['pageToken'] = nextPageToken
+            response_search = service.mediaItems().search(body=request_body).execute()
+            lstMediaItems = response_search.get('mediaItems')
+            nextPageToken = response_search.get('nextPageToken', '')
+            logger.info(json.dumps(lstMediaItems, indent=4))
+            logger.info(f"nextPageToken: {nextPageToken}")
+            return [lstMediaItems, nextPageToken]
+        except Exception as e:
+            logger.error(e)
+            n += 1
+            sleepTime = 2**n + random.random()
+            if n < 12:
+                logger.warning(f'retrying after exponential backoff of {sleepTime} seconds')
+                sleep(sleepTime)
+            else:
+                logger.error('API call to Google Photos Failed several times even with exponential backoff retry logic')
 
 def get_google_photo_frame_album_id(service):
     response_albums_list = service.albums().list().execute()
